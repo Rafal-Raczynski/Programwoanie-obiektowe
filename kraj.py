@@ -47,22 +47,21 @@ class ButtonImport(QPushButton):
         if file_extension not in self.__accepted_formats:
             print("Please choose file one more time")
 
-
     def get_filename(self):
         return self.__filepath
 
 
 class ReadData:
     def __init__(self, filepath, selected_countries):
-        self.__filename = filepath
+        self.__filepath = filepath
         self.__list_of_countries = list()
-        self.__read_all_countries_data(filepath)
-        self.selected_countries = selected_countries
-        self.display_selected_data(filepath, selected_countries)
+        self.__read_all_countries_data()
+        self.__selected_countries = selected_countries
+        self.display_selected_data()
 
-    def __read_all_countries_data(self, filename):
+    def __read_all_countries_data(self):
         i = 1
-        with open(filename, "r") as f:
+        with open(self.__filepath, "r") as f:
             for line in f:
                 possible_region = line.split(",")[0]
                 if i != 1 and possible_region == "":
@@ -71,14 +70,14 @@ class ReadData:
 
                 i = i + 1
 
-    def read_countries_data(self, filepath, countries):
+    def read_countries_data(self):
         countries_data = dict()
 
-        with open(filepath, "r") as f:
+        with open(self.__filepath, "r") as f:
             for line in f:
                 maybe_country = line.split(",")[1]
 
-                if maybe_country in countries:
+                if maybe_country in self.__selected_countries:
                     line = line.strip()
                     n_of_patients_in_time = self.get_patients_as_vector(line)
 
@@ -108,8 +107,8 @@ class ReadData:
         plt.legend()
         plt.show()
 
-    def display_selected_data(self, filepath, countries):
-        countries_data = self.read_countries_data(filepath, countries)
+    def display_selected_data(self):
+        countries_data = self.read_countries_data()
         self.display_data(countries_data)
 
 
@@ -118,7 +117,8 @@ if __name__ == "__main__":
 
     # accepted_formats = (".jpg", ".png")
     img_browser = Covid(600, 300)
-    # XD = ReadData("time_series_covid19_confirmed_global.csv", ["Poland","Russia"])
+    XD = ReadData("time_series_covid19_confirmed_global.csv", ["Poland", "Russia"])
+    XD.read_countries_data()
     # print(XD.get_list_of_all_countries())  # .keys())
 
     sys.exit(app.exec_())
