@@ -34,6 +34,8 @@ class Covid(QMainWindow):
         button = ButtonImport("csv")
         self.__layout.addWidget(button, 10, 10)
 
+        
+
 
 class ButtonImport(QPushButton):
     def __init__(self, accepted_formats):
