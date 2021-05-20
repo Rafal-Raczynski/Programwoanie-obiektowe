@@ -1,5 +1,5 @@
 import sys
-
+from os import walk, path
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QHBoxLayout, QGroupBox, QVBoxLayout, \
     QGridLayout, QLabel, QMainWindow, QFormLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -31,10 +31,8 @@ class Covid(QMainWindow):
         self.show()
 
     def __prepare_buttons(self):
-        button = ButtonImport("csv")
+        button = ButtonImport(".csv")
         self.__layout.addWidget(button, 10, 10)
-
-        
 
 
 class ButtonImport(QPushButton):
@@ -44,8 +42,11 @@ class ButtonImport(QPushButton):
         self.clicked.connect(self.__handle_select_file)
 
     def __handle_select_file(self):
-        self.__filepath = QFileDialog.getOpenFileName(self, "Select imgs dir")
-        print(self.__filepath)
+        self.__filepath, _ = QFileDialog.getOpenFileName(self, "Select file")
+        file_extension = path.splitext(self.__filepath)[1].lower()
+        if file_extension not in self.__accepted_formats:
+            print("Please choose file one more time")
+
 
     def get_filename(self):
         return self.__filepath
