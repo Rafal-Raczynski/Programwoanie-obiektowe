@@ -14,7 +14,6 @@ class Covid(QMainWindow):
         self.__init_view(width, height)
         self.__prepare_import_button()
         self.__prepare_chart_panel()
-        self.update()
 
     def __prepare_chart_panel(self):
         fig = Figure(figsize=(5, 3), dpi=100)
@@ -34,15 +33,16 @@ class Covid(QMainWindow):
 
     def __prepare_import_button(self):
         button = ButtonImport(".csv")
+        while (button.get_filepath() == None):
+            button.handle_select_file()
         self.__layout.addWidget(button, 10, 10)
         self.__filepath = button.get_filepath()
         print(self.__filepath)
-        # a = ReadData("/mnt/c/Kodowanie2/projekcik/Programowanie-obiektowe/time_series_covid19_confirmed_global.csv",
-        # "Poland")
-
+        a = ReadData(button.get_filepath(), "Poland")
+        scroll = ScrollButtons(a.get_list_of_all_countries())
         # countries = a.get_list_of_all_countries()
 
-        #self.__layout.addWidget(button.scroll, 5, 10, 5, 2)
+        self.__layout.addWidget(scroll, 5, 10, 5, 2)
 
     # self.__layout.addWidget(scroll, 1, 10, 9, 1)
 
@@ -58,12 +58,12 @@ class ButtonImport(QPushButton):
         self.__accepted_formats = accepted_formats
         self.__filepath = None
         self.scroll = None
-        self.clicked.connect(self.__handle_select_file)
+        self.clicked.connect(self.handle_select_file)
 
     def get_filepath(self):
         return self.__filepath
 
-    def __handle_select_file(self):
+    def handle_select_file(self):
         self.__filepath, _ = QFileDialog.getOpenFileName(self, "Select file")
         file_extension = path.splitext(self.__filepath)[1].lower()
         if file_extension not in self.__accepted_formats:
@@ -113,7 +113,6 @@ class ReadData:
         return n_of_patients_in_time
 
     def get_list_of_all_countries(self):
-        # print(self.__list_of_countries)
         return self.__list_of_countries
 
     def display_data(self, n_of_patients_in_countries):
