@@ -38,8 +38,11 @@ class Covid(QMainWindow):
         self.__layout.addWidget(button, 10, 10)
         self.__filepath = button.get_filepath()
         print(self.__filepath)
-        a = ReadData(button.get_filepath(), "Poland")
-        scroll = ScrollButtons(a.get_list_of_all_countries())
+        while True:
+            if button.handle_select_file() == 0:
+                a = ReadData(button.get_filepath(), "Poland")
+                scroll = ScrollButtons(a.get_list_of_all_countries())
+                break
         # countries = a.get_list_of_all_countries()
 
         self.__layout.addWidget(scroll, 5, 10, 5, 2)
@@ -68,6 +71,8 @@ class ButtonImport(QPushButton):
         file_extension = path.splitext(self.__filepath)[1].lower()
         if file_extension not in self.__accepted_formats:
             print("Please choose file one more time")
+            return 1
+        return 0
         # Data = ReadData(self.__filepath, "Poland")
         # self.scroll = ScrollButtons(Data.get_list_of_all_countries())
 
