@@ -39,6 +39,7 @@ class Covid(QMainWindow):
             if button.handle_select_file() == 0:
                 a = ReadData(button.get_filepath(), "Poland")
                 scroll = ScrollButtons(a.get_list_of_all_countries())
+                a.display_selected_data()
                 break
         # countries = a.get_list_of_all_countries()
 
