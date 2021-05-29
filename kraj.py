@@ -50,6 +50,7 @@ class Covid(QMainWindow):
     #     a = ReadData("time_series_covid19_confirmed_global.csv", "Poland")
     #     scroll = ScrollButtons(a.get_list_of_all_countries())
     #     self.__layout.addWidget(scroll, 1, 10, 9, 1)
+    # ebeebe
 
 
 class ButtonImport(QPushButton):
