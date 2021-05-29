@@ -33,11 +33,8 @@ class Covid(QMainWindow):
 
     def __prepare_import_button(self):
         button = ButtonImport(".csv")
-        while (button.get_filepath() == None):
-            button.handle_select_file()
         self.__layout.addWidget(button, 10, 10)
         self.__filepath = button.get_filepath()
-        print(self.__filepath)
         while True:
             if button.handle_select_file() == 0:
                 a = ReadData(button.get_filepath(), "Poland")
@@ -162,7 +159,7 @@ if __name__ == "__main__":
     app = QApplication([])
 
     # accepted_formats = (".jpg", ".png")
-    img_browser = Covid(600, 300)
+    img_browser = Covid(1000, 600)
     # XD = ReadData("/mnt/c/Kodowanie2/projekcik/Programowanie-obiektowe/time_series_covid19_confirmed_global.csv",
     #               ["Poland", "Russia"])
 
