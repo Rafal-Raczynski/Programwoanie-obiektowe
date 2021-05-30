@@ -4,7 +4,7 @@ from os import walk, path
 from plot import Plot
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QHBoxLayout, QGroupBox, QVBoxLayout, \
-    QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea
+    QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea, QMessageBox
 
 
 class Covid(QMainWindow):
@@ -15,7 +15,6 @@ class Covid(QMainWindow):
 
     def __init_view(self, width, height):
         self.setWindowTitle("Covid-21")
-
         self.__layout = QGridLayout()
         elems = QGroupBox()
         elems.setLayout(self.__layout)
@@ -73,7 +72,13 @@ class ButtonImport(QPushButton):
         self.__filepath, _ = QFileDialog.getOpenFileName(self, "Select file")
         file_extension = path.splitext(self.__filepath)[1].lower()
         if file_extension not in self.__accepted_formats:
-            print("Please choose file one more time")
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Wrong file!")
+            msg.setInformativeText("Please choose file again")
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            print("Wrong file! Please choose file again")
             return 1
         return 0
 
