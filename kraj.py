@@ -44,8 +44,7 @@ class Plot(FigureCanvasQTAgg):
         self.__axes.grid()
         self.__axes.legend()
         self.draw()
-        #self.__axes.clear()
-
+        self.__axes.clear()
 
     def display_selected_data(self):
         countries_data = self.__read_countries_data()
@@ -56,8 +55,6 @@ class Plot(FigureCanvasQTAgg):
 
     def remove_country(self, name):
         self.__selected_countries.remove(name)
-
-
 
 
 class Covid(QMainWindow):
@@ -168,8 +165,7 @@ class ScrollButtons(QScrollArea):
         for i in self.__all_countries:
             name = i
             btn = QPushButton(name)
-            clicked = 0
-            # btn.clicked.connect((lambda name_to_show: lambda _: print(name_to_show))(name))
+            clicked=0
             if clicked % 2 == 0:
                 btn.clicked.connect(self.add(name))
                 btn.clicked.connect(self.show())
