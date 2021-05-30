@@ -62,7 +62,7 @@ class Covid(QMainWindow):
         super().__init__()
         self.__init_view(width, height)
         self.__prepare_import_button()
-        self.__prepare_chart_panel()
+       # self.__prepare_chart_panel()
 
     # def __prepare_chart_panel(self):
     #     fig = Figure(figsize=(5, 3), dpi=100)
@@ -98,7 +98,7 @@ class Covid(QMainWindow):
         # countries = a.get_list_of_all_countries()
 
         self.__layout.addWidget(scroll, 5, 10, 5, 2)
-
+        self.__layout.addWidget(scroll.data, 0, 0, 8, 3)
 
     # self.__layout.addWidget(scroll, 1, 10, 9, 1)
 
@@ -156,7 +156,7 @@ class ScrollButtons(QScrollArea):
     def __init__(self, all_countries):
         super().__init__()
         self.__all_countries = all_countries
-        self.__data = Plot("time_series_covid19_confirmed_global.csv")
+        self.data = Plot("time_series_covid19_confirmed_global.csv")
         self.__init_view()
 
     def __init_view(self):
@@ -174,12 +174,12 @@ class ScrollButtons(QScrollArea):
 
     def handle_selected_countries(self, name):
         print("Clicked:", name)
-        if name in self.__data.selected_countries:
-            self.__data.remove_country(name)
+        if name in self.data.selected_countries:
+            self.data.remove_country(name)
         else:
-            self.__data.add_country(name)
-        self.__data.display_selected_data()
-        self.__data.show()
+            self.data.add_country(name)
+        self.data.display_selected_data()
+        self.data.show()
     #
     # def remove(self, name):
     #     return lambda _: self.__data.add_country(name)
