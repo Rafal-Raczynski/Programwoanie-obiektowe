@@ -37,9 +37,9 @@ class Covid(QMainWindow):
         self.__filepath = button.get_filepath()
         while True:
             if button.handle_select_file() == 0:
-                a = ReadData(button.get_filepath(), "Poland")
-                scroll = ScrollButtons(a.get_list_of_all_countries())
-                a.display_selected_data()
+                selected_countries = ["Poland"]
+                a = ReadData(button.get_filepath(), selected_countries)
+                scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath())
                 break
         # countries = a.get_list_of_all_countries()
 
@@ -137,9 +137,11 @@ class ReadData:
 
 
 class ScrollButtons(QScrollArea):
-    def __init__(self, all_countries):
+    def __init__(self, all_countries, filepath):
         super().__init__()
+        self.__filepath = filepath
         self.__all_countries = all_countries
+        self.selected_countries = []
         self.__init_view()
 
     def __init_view(self):
@@ -149,12 +151,21 @@ class ScrollButtons(QScrollArea):
         for i in self.__all_countries:
             name = i
             btn = QPushButton(name)
-            # btn.clicked.connect((lambda name_to_show: lambda _: print(name_to_show))(name))
+            btn.clicked.connect(lambda checked, n=name: self.handle_selected_countries(n))
             btn_layout.addRow(btn)
 
         btn_group.setLayout(btn_layout)
         self.setWidget(btn_group)
         self.setWidgetResizable(True)
+
+    def handle_selected_countries(self, name):
+        print("Clicked:", name)
+        if name in self.selected_countries:
+            self.selected_countries.remove(name)
+        else:
+            self.selected_countries.append(name)
+        a = ReadData(self.__filepath, self.selected_countries)
+        a.display_selected_data()
 
 
 if __name__ == "__main__":
