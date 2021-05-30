@@ -8,6 +8,47 @@ from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 
 
+class Plot(FigureCanvasQTAgg):
+    def __init__(self, filepath, width=4, height=4, dpi=100):
+        self.__filepath = filepath
+        self.__fig = Figure(figsize=(width, height), dpi=dpi)
+        super().__init__(self.__fig)
+        self.__axes = None
+
+    def __read_countries_data(self, selected_countries):
+        countries_data = dict()
+        with open(self.__filepath, "r") as f:
+            for line in f:
+                maybe_country = line.split(",")[1]
+                if maybe_country in selected_countries:
+                    line = line.strip()
+                    n_of_patients_in_time = self.__get_patients_as_vector(line)
+                    countries_data[maybe_country] = n_of_patients_in_time
+        return countries_data
+
+    def __get_patients_as_vector(self, country_data_line):
+        n_of_unimportant_column = 4
+        n_of_patients_in_time = country_data_line.split(",")[n_of_unimportant_column:]
+        n_of_patients_in_time = [int(val) for val in n_of_patients_in_time]
+        return n_of_patients_in_time
+
+    def __display_data(self, n_of_patients_in_countries):
+        if self.__axes is None:
+            self.__axes = self.__fig.add_subplot(111)
+        for country, data in n_of_patients_in_countries.items():
+            self.__axes.semilogy(data, label=country)
+        self.__axes.set_xlabel("Days (subsequent data)")
+        self.__axes.set_ylabel("Total number of patients")
+        self.__axes.set_title("Covid-19 number of patients since 01.01.2020")
+        self.__axes.grid()
+        self.__axes.legend()
+        self.draw()
+
+    def display_selected_data(self, countries):
+        countries_data = self.__read_countries_data(countries)
+        self.__display_data(countries_data)
+
+
 class Covid(QMainWindow):
     def __init__(self, width, height):
         super().__init__()
@@ -15,10 +56,15 @@ class Covid(QMainWindow):
         self.__prepare_import_button()
         self.__prepare_chart_panel()
 
+    # def __prepare_chart_panel(self):
+    #     fig = Figure(figsize=(5, 3), dpi=100)
+    #     chart = FigureCanvasQTAgg(fig)
+    #     self.__layout.addWidget(chart, 0, 0, 8, 3)
+
     def __prepare_chart_panel(self):
-        fig = Figure(figsize=(5, 3), dpi=100)
-        chart = FigureCanvasQTAgg(fig)
-        self.__layout.addWidget(chart, 0, 0, 8, 3)
+        fig = Plot("time_series_covid19_confirmed_global.csv")
+        fig.display_selected_data(["Poland", "Sweden"])
+        self.__layout.addWidget(fig, 0, 0, 8, 3)
 
     def __init_view(self, width, height):
         self.setWindowTitle("Covid-21")
@@ -33,13 +79,13 @@ class Covid(QMainWindow):
 
     def __prepare_import_button(self):
         button = ButtonImport(".csv")
-        while (button.get_filepath() == None):
-            button.handle_select_file()
         self.__layout.addWidget(button, 10, 10)
         self.__filepath = button.get_filepath()
-        print(self.__filepath)
-        a = ReadData(button.get_filepath(), "Poland")
-        scroll = ScrollButtons(a.get_list_of_all_countries())
+        while True:
+            if button.handle_select_file() == 0:
+                a = ReadData(button.get_filepath())
+                scroll = ScrollButtons(a.get_list_of_all_countries())
+                break
         # countries = a.get_list_of_all_countries()
 
         self.__layout.addWidget(scroll, 5, 10, 5, 2)
@@ -50,6 +96,7 @@ class Covid(QMainWindow):
     #     a = ReadData("time_series_covid19_confirmed_global.csv", "Poland")
     #     scroll = ScrollButtons(a.get_list_of_all_countries())
     #     self.__layout.addWidget(scroll, 1, 10, 9, 1)
+    # ebeebe
 
 
 class ButtonImport(QPushButton):
@@ -68,16 +115,17 @@ class ButtonImport(QPushButton):
         file_extension = path.splitext(self.__filepath)[1].lower()
         if file_extension not in self.__accepted_formats:
             print("Please choose file one more time")
+            return 1
+        return 0
         # Data = ReadData(self.__filepath, "Poland")
         # self.scroll = ScrollButtons(Data.get_list_of_all_countries())
 
 
 class ReadData:
-    def __init__(self, filepath, selected_countries):
+    def __init__(self, filepath):
         self.__filepath = filepath
         self.__list_of_countries = list()
         self.__read_all_countries_data()
-        self.__selected_countries = selected_countries
 
     def __read_all_countries_data(self):
         i = 1
@@ -90,52 +138,15 @@ class ReadData:
 
                 i = i + 1
 
-    def read_countries_data(self):
-        countries_data = dict()
-
-        with open(self.__filepath, "r") as f:
-            for line in f:
-                maybe_country = line.split(",")[1]
-
-                if maybe_country in self.__selected_countries:
-                    line = line.strip()
-                    n_of_patients_in_time = self.get_patients_as_vector(line)
-
-                    countries_data[maybe_country] = n_of_patients_in_time
-
-        return countries_data
-
-    def get_patients_as_vector(self, country_data_line):
-        n_of_unimportant_column = 4
-        n_of_patients_in_time = country_data_line.split(",")[n_of_unimportant_column:]
-        n_of_patients_in_time = [int(val) for val in n_of_patients_in_time]
-
-        return n_of_patients_in_time
-
     def get_list_of_all_countries(self):
         return self.__list_of_countries
-
-    def display_data(self, n_of_patients_in_countries):
-
-        for country, data in n_of_patients_in_countries.items():
-            plt.semilogy(data, label=country)
-
-        plt.xlabel("Days (subsequent data)")
-        plt.ylabel("Total number of patients")
-        plt.title("Covid-19 number of patients since 01.01.2020")
-        plt.grid()
-        plt.legend()
-        plt.show()
-
-    def display_selected_data(self):
-        countries_data = self.read_countries_data()
-        self.display_data(countries_data)
 
 
 class ScrollButtons(QScrollArea):
     def __init__(self, all_countries):
         super().__init__()
         self.__all_countries = all_countries
+        self.__data = Plot("time_series_covid19_confirmed_global.csv")
         self.__init_view()
 
     def __init_view(self):
@@ -145,19 +156,28 @@ class ScrollButtons(QScrollArea):
         for i in self.__all_countries:
             name = i
             btn = QPushButton(name)
+            clicked = 0
             # btn.clicked.connect((lambda name_to_show: lambda _: print(name_to_show))(name))
+            btn.clicked.connect(self.func_print_me(name))
+            self.__data.show()
             btn_layout.addRow(btn)
 
         btn_group.setLayout(btn_layout)
         self.setWidget(btn_group)
         self.setWidgetResizable(True)
 
+    def func_print_me(self, name):
+        return lambda _: self.__data.display_selected_data(name)
+
+    # def func_print_me(self, name):
+    #     return lambda _: print(name)
+
 
 if __name__ == "__main__":
     app = QApplication([])
 
     # accepted_formats = (".jpg", ".png")
-    img_browser = Covid(600, 300)
+    img_browser = Covid(1000, 600)
     # XD = ReadData("/mnt/c/Kodowanie2/projekcik/Programowanie-obiektowe/time_series_covid19_confirmed_global.csv",
     #               ["Poland", "Russia"])
 
