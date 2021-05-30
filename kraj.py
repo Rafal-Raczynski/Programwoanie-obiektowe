@@ -11,16 +11,17 @@ from matplotlib import pyplot as plt
 class Plot(FigureCanvasQTAgg):
     def __init__(self, filepath, width=4, height=4, dpi=100):
         self.__filepath = filepath
+        self.__selected_countries = list()
         self.__fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.__fig)
         self.__axes = None
 
-    def __read_countries_data(self, selected_countries):
+    def __read_countries_data(self):
         countries_data = dict()
         with open(self.__filepath, "r") as f:
             for line in f:
                 maybe_country = line.split(",")[1]
-                if maybe_country in selected_countries:
+                if maybe_country in self.__selected_countries:
                     line = line.strip()
                     n_of_patients_in_time = self.__get_patients_as_vector(line)
                     countries_data[maybe_country] = n_of_patients_in_time
@@ -43,10 +44,20 @@ class Plot(FigureCanvasQTAgg):
         self.__axes.grid()
         self.__axes.legend()
         self.draw()
+        #self.__axes.clear()
 
-    def display_selected_data(self, countries):
-        countries_data = self.__read_countries_data(countries)
+
+    def display_selected_data(self):
+        countries_data = self.__read_countries_data()
         self.__display_data(countries_data)
+
+    def add_country(self, name):
+        self.__selected_countries.append(name)
+
+    def remove_country(self, name):
+        self.__selected_countries.remove(name)
+
+
 
 
 class Covid(QMainWindow):
@@ -63,7 +74,8 @@ class Covid(QMainWindow):
 
     def __prepare_chart_panel(self):
         fig = Plot("time_series_covid19_confirmed_global.csv")
-        fig.display_selected_data(["Poland", "Sweden"])
+        fig.add_country("Poland")
+        fig.display_selected_data()
         self.__layout.addWidget(fig, 0, 0, 8, 3)
 
     def __init_view(self, width, height):
@@ -158,19 +170,26 @@ class ScrollButtons(QScrollArea):
             btn = QPushButton(name)
             clicked = 0
             # btn.clicked.connect((lambda name_to_show: lambda _: print(name_to_show))(name))
-            btn.clicked.connect(self.func_print_me(name))
+            if clicked % 2 == 0:
+                btn.clicked.connect(self.add(name))
+                btn.clicked.connect(self.show())
+            else:
+                btn.clicked.connect(self.remove(name))
+                btn.clicked.connect(self.show())
             self.__data.show()
             btn_layout.addRow(btn)
-
         btn_group.setLayout(btn_layout)
         self.setWidget(btn_group)
         self.setWidgetResizable(True)
 
-    def func_print_me(self, name):
-        return lambda _: self.__data.display_selected_data(name)
+    def remove(self, name):
+        return lambda _: self.__data.add_country(name)
 
-    # def func_print_me(self, name):
-    #     return lambda _: print(name)
+    def add(self, name):
+        return lambda _: self.__data.add_country(name)
+
+    def show(self):
+        return lambda _: self.__data.display_selected_data()
 
 
 if __name__ == "__main__":
