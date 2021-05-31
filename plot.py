@@ -20,7 +20,10 @@ class Plot(FigureCanvasQTAgg):
         countries_data = dict()
         with open(self.__filepath, "r") as f:
             for line in f:
-                maybe_country = line.split(",")[1]
+                if line.split(",")[0] == "":
+                    maybe_country = line.split(",")[1]
+                else:
+                    maybe_country = line.split(",")[1] + ", " + line.split(",")[0]
                 if maybe_country in self.selected_countries:
                     line = line.strip()
                     n_of_patients_in_time = self.__get_patients_as_vector(line)
