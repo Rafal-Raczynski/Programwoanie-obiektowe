@@ -10,6 +10,8 @@ class Plot(FigureCanvasQTAgg):
         self.__fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.__fig)
         self.__axes = None
+        self.__low = None
+        self.__up = None
 
     def __read_countries_data(self):
         countries_data = dict()
@@ -34,13 +36,20 @@ class Plot(FigureCanvasQTAgg):
             self.__axes = self.__fig.add_subplot(111)
         for country, data in n_of_patients_in_countries.items():
             self.__axes.semilogy(data, label=country)
+
         self.__axes.set_xlabel("Days (subsequent data)")
         self.__axes.set_ylabel("Total number of patients")
         self.__axes.set_title("COVID-19 cases graph for countries")
         self.__axes.grid()
         self.__axes.legend()
+        self.__axes.set_xlim(self.__low, self.__up)
         self.draw()
         self.__axes.clear()
+
+    def set_x_lim(self, low, up):
+        self.__low = low
+        self.__up = up
+        self.display_selected_data()
 
     def display_selected_data(self):
         countries_data = self.__read_countries_data()
