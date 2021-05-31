@@ -39,7 +39,7 @@ class Covid(QMainWindow):
         # plot.set_x_lim(100, 200)
         scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath(),
                                plot)
-        slider = Sliders(1,a.get_amount_of_days(),plot)
+        slider = Sliders(1, a.get_amount_of_days(), plot)
         self.__layout.addWidget(scroll, 2, 15, 6, 3)
         filtr = Filtr(a.get_list_of_all_countries(), button.get_filepath(), scroll)
         self.__layout.addWidget(filtr, 0, 15, 1, 3)
@@ -150,8 +150,9 @@ class Filtr(QLineEdit):
         self.__filepath = filepath
         self.__all_countries = all_countries
         self.__filtred_countries = list()
+        self.setPlaceholderText("Enter country name...")
         self.scroll = scroll
-        self.button = QPushButton("Filtr")
+        self.button = QPushButton("Filter")
         self.button.clicked.connect(self.__filtr_countries)
 
     def __filtr_countries(self):
