@@ -3,6 +3,7 @@ from os import walk, path
 
 from plot import Plot
 from pdf_generator import PdfReportGenerator
+from PyQt5 import QtCore
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QHBoxLayout, QGroupBox, QVBoxLayout, \
     QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea, QMessageBox, QLineEdit, QSlider
@@ -38,17 +39,17 @@ class Covid(QMainWindow):
         # plot.set_x_lim(100, 200)
         scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath(),
                                plot)
-        slider = Slider()
+        slider = Sliders(1,a.get_amount_of_days(),plot)
         self.__layout.addWidget(scroll, 2, 15, 6, 3)
         filtr = Filtr(a.get_list_of_all_countries(), button.get_filepath(), scroll)
         self.__layout.addWidget(filtr, 0, 15, 1, 3)
         self.__layout.addWidget(filtr.button, 1, 15, 1, 3)
         self.__layout.addWidget(plot, 0, 0, 8, 5)
-        # self.__layout.addWidget(slider, 9, 0, 5, 1)
+        self.__layout.addWidget(slider.get_low_slider())
+        self.__layout.addWidget(slider.get_high_slider())
 
         pdf_button = PdfSaveButton("Export to PDF", plot)
         self.__layout.addWidget(pdf_button, 10, 15)
-
 
 
 class ReadData:
@@ -68,7 +69,11 @@ class ReadData:
                     if self.__amount_of_days is None:
                         self.__amount_of_days = len(line.split(",")[4:])
                     self.__list_of_countries.append(country)
-
+                elif i != 1:
+                    country = line.split(",")[1] + ", " + line.split(",")[0]
+                    if self.__amount_of_days is None:
+                        self.__amount_of_days = len(line.split(",")[4:])
+                    self.__list_of_countries.append(country)
                 i = i + 1
 
     def get_amount_of_days(self):
@@ -162,9 +167,47 @@ class Filtr(QLineEdit):
         self.scroll.set_all_countries(self.__filtred_countries)
 
 
-class Slider(QSlider):
-    def __init__(self):
+class Sliders(QSlider):
+    def __init__(self, min_value, max_value, plot: Plot, min_width=150):
         super().__init__()
+        self.__min_value = min_value
+        self.__max_value = max_value
+        self.__min_width = min_width
+        self.__plot = plot
+        self.__low_slider = self.__prepare_low_slider()
+        self.__high_slider = self.__prepare_high_slider()
+
+    def __prepare_slider(self, value):
+        slider = QSlider(QtCore.Qt.Horizontal)
+        slider.setMinimum(self.__min_value)
+        slider.setMaximum(self.__max_value)
+        slider.setMinimumWidth(self.__min_width)
+        slider.setValue(value)
+        return slider
+
+    def __prepare_low_slider(self):
+        slider = self.__prepare_slider(self.__min_value)
+        slider.valueChanged.connect(self.__change_low)
+        return slider
+
+    def __prepare_high_slider(self):
+        slider = self.__prepare_slider(self.__max_value)
+        slider.valueChanged.connect(self.__change_high)
+        return slider
+
+    def __change_low(self):
+        print("XD")
+        self.__plot.set_x_low_lim(self.__low_slider.value())
+
+    def __change_high(self):
+        print("XD")
+        self.__plot.set_x_high_lim(self.__high_slider.value())
+
+    def get_low_slider(self):
+        return self.__low_slider
+
+    def get_high_slider(self):
+        return self.__high_slider
 
 
 class PdfSaveButton(QPushButton):
