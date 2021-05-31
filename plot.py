@@ -22,7 +22,8 @@ class Plot(FigureCanvasQTAgg):
                     countries_data[maybe_country] = n_of_patients_in_time
         return countries_data
 
-    def __get_patients_as_vector(self, country_data_line):
+    @staticmethod
+    def __get_patients_as_vector(country_data_line):
         n_of_unimportant_column = 4
         n_of_patients_in_time = country_data_line.split(",")[n_of_unimportant_column:]
         n_of_patients_in_time = [int(val) for val in n_of_patients_in_time]
@@ -33,9 +34,9 @@ class Plot(FigureCanvasQTAgg):
             self.__axes = self.__fig.add_subplot(111)
         for country, data in n_of_patients_in_countries.items():
             self.__axes.semilogy(data, label=country)
-        self.__axes.set_xlabel("Dni")
-        self.__axes.set_ylabel("Sumaryczna liczba zachorowań")
-        self.__axes.set_title("Wykres zachorowań na COVID-19")
+        self.__axes.set_xlabel("Days (subsequent data)")
+        self.__axes.set_ylabel("Total number of patients")
+        self.__axes.set_title("COVID-19 cases graph for countries")
         self.__axes.grid()
         self.__axes.legend()
         self.draw()
