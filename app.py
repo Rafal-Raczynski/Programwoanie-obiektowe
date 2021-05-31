@@ -2,16 +2,19 @@ import sys
 from os import walk, path
 
 from plot import Plot
+from pdf_generator import PdfReportGenerator
 
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QHBoxLayout, QGroupBox, QVBoxLayout, \
-    QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea, QMessageBox
+    QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea, QMessageBox, QLineEdit
+from reportlab.lib.utils import ImageReader
 
 
 class Covid(QMainWindow):
     def __init__(self, width, height):
         super().__init__()
         self.__init_view(width, height)
-        self.__prepare_import_button()
+        self.__prepare_buttons()
+        self.__prepare_pdf_button()
 
     def __init_view(self, width, height):
         self.setWindowTitle("Covid-21")
@@ -23,17 +26,26 @@ class Covid(QMainWindow):
         self.setCentralWidget(elems)
         self.show()
 
-    def __prepare_import_button(self):
+    def __prepare_buttons(self):
         button = ButtonImport(".csv")
-        self.__layout.addWidget(button, 10, 10)
+        self.__layout.addWidget(button, 10, 17)
+        button.clicked.connect(button.handle_select_file)
         while True:
             if button.handle_select_file() == 0:
-                a = ReadData(button.get_filepath())
-                scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath())
                 break
+        a = ReadData(button.get_filepath())
+        scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath())
+        filtr = Filtr(a.get_list_of_all_countries(), button.get_filepath(), scroll)
+        self.__layout.addWidget(filtr, 0, 15, 1, 3)
+        self.__layout.addWidget(filtr.button, 1, 15, 1, 3)
+        self.__layout.addWidget(scroll, 2, 15, 6, 3)
+        self.__layout.addWidget(scroll.data, 0, 0, 8, 5)
 
-        self.__layout.addWidget(scroll, 5, 10, 5, 2)
-        self.__layout.addWidget(scroll.data, 0, 0, 8, 3)
+    def __prepare_pdf_button(self):
+        name = "Export to PDF"
+        graph = Plot("time_series_covid19_confirmed_global.csv")
+        pdf_button = PdfSaveButton(name, graph)
+        self.__layout.addWidget(pdf_button, 10, 15)
 
     @staticmethod
     def handle_selected_countries(name, data):
@@ -113,6 +125,51 @@ class ScrollButtons(QScrollArea):
         self.setWidget(btn_group)
         self.setWidgetResizable(True)
 
+    def set_all_countries(self, countries):
+        self.__all_countries = countries
+        self.__init_view()
+
+class Filtr(QLineEdit):
+    def __init__(self, all_countries, filepath, scroll: ScrollButtons):
+        super().__init__()
+        self.__filepath = filepath
+        self.__all_countries = all_countries
+        self.__filtred_countries = list()
+        self.scroll = scroll
+        self.button = QPushButton("Filtr")
+        self.button.clicked.connect(self.__filtr_countries)
+
+    def __filtr_countries(self):
+        length = len(self.text())
+        for country in self.__all_countries:
+            if self.text().upper() == country[0:length].upper() and country not in self.__filtred_countries:
+                self.__filtred_countries.append(country)
+            elif self.text().upper() != country[0:length].upper() and country in self.__filtred_countries:
+                self.__filtred_countries.remove(country)
+        self.__update_buttons()
+
+    def __update_buttons(self):
+        self.scroll.set_all_countries(self.__filtred_countries)
+
+
+class PdfSaveButton(QPushButton):
+    def __init__(self, name, chart):
+        super().__init__(name)
+        self.__chart = chart
+        self.__pdf_generator = PdfReportGenerator()
+
+        self.clicked.connect(self.__save_btn_action)
+
+    def __save_btn_action(self):
+        img_data = self.__chart.display_selected_data()
+        img = ImageReader(img_data)
+
+        filename = self.__prepare_file_chooser()
+        self.__pdf_generator.create_and_save_report(img, filename)
+
+    def __prepare_file_chooser(self):
+        filename, _ = QFileDialog.getSaveFileName(self, "Save PDF report", filter="All Files (*)")
+        return filename
 
 
 if __name__ == "__main__":
