@@ -35,6 +35,16 @@ class Covid(QMainWindow):
         self.__layout.addWidget(scroll, 5, 10, 5, 2)
         self.__layout.addWidget(scroll.data, 0, 0, 8, 3)
 
+    @staticmethod
+    def handle_selected_countries(name, data):
+        print("Clicked:", name)
+        if name in data.selected_countries:
+            data.remove_country(name)
+        else:
+            data.add_country(name)
+        data.display_selected_data()
+        data.show()
+
 
 class ReadData:
     def __init__(self, filepath):
@@ -97,20 +107,12 @@ class ScrollButtons(QScrollArea):
         for i in self.__all_countries:
             name = i
             btn = QPushButton(name)
-            btn.clicked.connect(lambda checked, n=name: self.handle_selected_countries(n))
+            btn.clicked.connect(lambda checked, n=name: Covid.handle_selected_countries(n, self.data))
             btn_layout.addRow(btn)
         btn_group.setLayout(btn_layout)
         self.setWidget(btn_group)
         self.setWidgetResizable(True)
 
-    def handle_selected_countries(self, name):
-        print("Clicked:", name)
-        if name in self.data.selected_countries:
-            self.data.remove_country(name)
-        else:
-            self.data.add_country(name)
-        self.data.display_selected_data()
-        self.data.show()
 
 
 if __name__ == "__main__":
