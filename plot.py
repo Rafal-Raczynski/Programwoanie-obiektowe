@@ -1,9 +1,12 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
+from io import BytesIO
 
 
 class Plot(FigureCanvasQTAgg):
+    __IMG_FORMAT = "png"
+
     def __init__(self, filepath, width=4, height=4, dpi=100):
         self.__filepath = filepath
         self.selected_countries = list()
@@ -44,6 +47,10 @@ class Plot(FigureCanvasQTAgg):
         self.__axes.legend()
         self.__axes.set_xlim(self.__low, self.__up)
         self.draw()
+        self.__image = self.__get_img()
+        self.__axes.clear()
+
+    def clear_plot(self):
         self.__axes.clear()
 
     def set_x_lim(self, low, up):
@@ -60,3 +67,15 @@ class Plot(FigureCanvasQTAgg):
 
     def remove_country(self, name):
         self.selected_countries.remove(name)
+
+    def __get_img(self):
+        img_data = BytesIO()
+        self.__fig.savefig(img_data, format=self.__IMG_FORMAT)
+
+        seek_offset = 0
+        img_data.seek(seek_offset)
+
+        return img_data
+
+    def get_plot(self):
+        return self.__image

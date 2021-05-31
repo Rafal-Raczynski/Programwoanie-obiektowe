@@ -14,7 +14,6 @@ class Covid(QMainWindow):
         super().__init__()
         self.__init_view(width, height)
         self.__prepare_buttons()
-        self.__prepare_pdf_button()
 
     def __init_view(self, width, height):
         self.setWindowTitle("Covid-21")
@@ -36,7 +35,7 @@ class Covid(QMainWindow):
         a = ReadData(button.get_filepath())
         print(a.get_amount_of_days())
         plot = Plot(button.get_filepath())
-        plot.set_x_lim(100, 200)
+        # plot.set_x_lim(100, 200)
         scroll = ScrollButtons(a.get_list_of_all_countries(), button.get_filepath(),
                                plot)
         slider = Slider()
@@ -47,11 +46,9 @@ class Covid(QMainWindow):
         self.__layout.addWidget(plot, 0, 0, 8, 5)
         # self.__layout.addWidget(slider, 9, 0, 5, 1)
 
-    def __prepare_pdf_button(self):
-        name = "Export to PDF"
-        graph = Plot("time_series_covid19_confirmed_global.csv")
-        pdf_button = PdfSaveButton(name, graph)
+        pdf_button = PdfSaveButton("Export to PDF", plot)
         self.__layout.addWidget(pdf_button, 10, 15)
+
 
 
 class ReadData:
@@ -171,22 +168,28 @@ class Slider(QSlider):
 
 
 class PdfSaveButton(QPushButton):
-    def __init__(self, name, chart):
+    def __init__(self, name, plot: Plot):
         super().__init__(name)
-        self.__chart = chart
+        self.__plot = plot
         self.__pdf_generator = PdfReportGenerator()
 
         self.clicked.connect(self.__save_btn_action)
 
     def __save_btn_action(self):
-        img_data = self.__chart.display_selected_data()
+        img_data = self.__plot.get_plot()
         img = ImageReader(img_data)
 
         filename = self.__prepare_file_chooser()
         self.__pdf_generator.create_and_save_report(img, filename)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("Data exported to the file:")
+        msg.setInformativeText(filename)
+        msg.setWindowTitle("OK")
+        msg.exec_()
 
     def __prepare_file_chooser(self):
-        filename, _ = QFileDialog.getSaveFileName(self, "Save PDF report", filter="All Files (*)")
+        filename, _ = QFileDialog.getSaveFileName(self, "Save PDF report", filter="*.pdf")
         return filename
 
 
