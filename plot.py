@@ -51,9 +51,7 @@ class Plot(FigureCanvasQTAgg):
         self.__axes.set_xlim(self.__low, self.__up)
         self.draw()
         self.__image = self.__get_img()
-        self.__axes.clear()
-
-    def clear_plot(self):
+        self.__ex_data = n_of_patients_in_countries
         self.__axes.clear()
 
     def set_x_lim(self, low, up):
@@ -82,3 +80,6 @@ class Plot(FigureCanvasQTAgg):
 
     def get_plot(self):
         return self.__image
+
+    def get_data(self):
+        return self.__ex_data

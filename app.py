@@ -221,10 +221,11 @@ class PdfSaveButton(QPushButton):
 
     def __save_btn_action(self):
         img_data = self.__plot.get_plot()
+        data = self.__plot.get_data()
         img = ImageReader(img_data)
 
         filename = self.__prepare_file_chooser()
-        self.__pdf_generator.create_and_save_report(img, filename)
+        self.__pdf_generator.create_and_save_report(img, data, filename)
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Data exported to the file:")
