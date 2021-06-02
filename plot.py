@@ -84,7 +84,7 @@ class Plot(FigureCanvasQTAgg):
     def get_plot(self):
         return self.__image
 
-    def get_data(self):
+    def get_countries(self):
         c_list = list(self.__ex_data.keys())
         countries_end = '; '.join(c_list)
         countries = "Selected countries (provinces): " + countries_end

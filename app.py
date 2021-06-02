@@ -3,8 +3,8 @@ from os import walk, path
 
 from plot import Plot
 from pdf_generator import PdfReportGenerator
-from PyQt5 import QtCore
 
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QHBoxLayout, QGroupBox, QVBoxLayout, \
     QGridLayout, QLabel, QMainWindow, QFormLayout, QScrollArea, QMessageBox, QLineEdit, QSlider
 from reportlab.lib.utils import ImageReader
@@ -48,10 +48,10 @@ class Covid(QMainWindow):
         self.__layout.addWidget(plot, 0, 0, 8, 5)
         self.__layout.addWidget(slider.get_low_slider(), 9, 1, 1, 4)
         self.__layout.addWidget(slider.get_high_slider(), 10, 1, 1, 4)
-        self.__layout.addWidget(slider.get_low_slider_date(), 9, 0, 1, 1)
-        self.__layout.addWidget(slider.get_high_slider_date(), 10, 0, 1, 1)
+        self.__layout.addWidget(slider.get_low_slider_date_text(), 9, 0, 1, 1)
+        self.__layout.addWidget(slider.get_high_slider_date_text(), 10, 0, 1, 1)
 
-        pdf_button = PdfSaveButton("Export to PDF", plot)
+        pdf_button = PdfSaveButton("Export to PDF", plot, slider)
         self.__layout.addWidget(pdf_button, 10, 15)
 
 
@@ -182,10 +182,10 @@ class Sliders(QSlider):
         self.__high_slider_date = QLabel()
         self.__default_variables()
 
-    def get_low_slider_date(self):
+    def get_low_slider_date_text(self):
         return self.__low_slider_date
 
-    def get_high_slider_date(self):
+    def get_high_slider_date_text(self):
         return self.__high_slider_date
 
     def __prepare_slider(self, value):
@@ -212,7 +212,7 @@ class Sliders(QSlider):
         high_value = self.__high_slider.value()
         if new_value >= high_value:
             self.__low_slider.setValue(high_value - 1)
-        self.__get_low_slider_date()
+        self.get_low_slider_date()
 
     def __change_high(self):
         self.__plot.set_x_high_lim(self.__high_slider.value())
@@ -220,7 +220,7 @@ class Sliders(QSlider):
         low_value = self.__low_slider.value()
         if new_value <= low_value:
             self.__high_slider.setValue(low_value + 1)
-        self.__get_high_slider_date()
+        self.get_high_slider_date()
 
     def __default_variables(self):
         start = "22-01-2021"
@@ -237,36 +237,40 @@ class Sliders(QSlider):
     def get_high_slider(self):
         return self.__high_slider
 
-    def __get_low_slider_date(self):
+    def get_low_slider_date(self):
         start_date = "22-01-20"
         date = datetime.strptime(start_date, "%d-%m-%y")
         end_date = date + timedelta(days=self.__low_slider.value() - 1)
         end_date = end_date.strftime("%d-%m-%Y")
         self.__low_slider_date.setText(end_date)
+        return end_date
 
-    def __get_high_slider_date(self):
+    def get_high_slider_date(self):
         start_date = "22-01-20"
         date = datetime.strptime(start_date, "%d-%m-%y")
         end_date = date + timedelta(days=self.__high_slider.value() - 1)
         end_date = end_date.strftime("%d-%m-%Y")
         self.__high_slider_date.setText(end_date)
+        return end_date
 
 
 class PdfSaveButton(QPushButton):
-    def __init__(self, name, plot: Plot):
+    def __init__(self, name, plot: Plot, slider: Sliders):
         super().__init__(name)
         self.__plot = plot
+        self.__slider = slider
         self.__pdf_generator = PdfReportGenerator()
 
         self.clicked.connect(self.__save_btn_action)
 
     def __save_btn_action(self):
         img_data = self.__plot.get_plot()
-        data = self.__plot.get_data()
+        countries = self.__plot.get_countries()
         img = ImageReader(img_data)
 
         filename = self.__prepare_file_chooser()
-        self.__pdf_generator.create_and_save_report(img, data, filename)
+        timespan = [self.__slider.get_low_slider_date(), self.__slider.get_high_slider_date()]
+        self.__pdf_generator.create_and_save_report(img, countries, timespan, filename)
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Data exported to the file:")
