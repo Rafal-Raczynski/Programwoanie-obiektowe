@@ -32,7 +32,7 @@ class Covid(QMainWindow):
         button.clicked.connect(button.handle_select_file)
         while True:
             if button.handle_select_file() == 0:
-                button.setDisabled(True)
+                # button.setDisabled(True)
                 break
         a = ReadData(button.get_filepath())
         print(a.get_amount_of_days())
@@ -46,8 +46,8 @@ class Covid(QMainWindow):
         self.__layout.addWidget(filtr, 0, 15, 1, 3)
         self.__layout.addWidget(filtr.button, 1, 15, 1, 3)
         self.__layout.addWidget(plot, 0, 0, 8, 5)
-        self.__layout.addWidget(slider.get_low_slider())
-        self.__layout.addWidget(slider.get_high_slider())
+        self.__layout.addWidget(slider.get_low_slider(), 9, 0, 1, 5)
+        self.__layout.addWidget(slider.get_high_slider(), 10, 0, 1, 5)
 
         pdf_button = PdfSaveButton("Export to PDF", plot)
         self.__layout.addWidget(pdf_button, 10, 15)
@@ -189,21 +189,27 @@ class Sliders(QSlider):
 
     def __prepare_low_slider(self):
         slider = self.__prepare_slider(self.__min_value)
-        slider.valueChanged.connect(self.__change_low)
+        slider.valueChanged.connect(lambda checked,: self.__change_low())
         return slider
 
     def __prepare_high_slider(self):
         slider = self.__prepare_slider(self.__max_value)
-        slider.valueChanged.connect(self.__change_high)
+        slider.valueChanged.connect(lambda checked,: self.__change_high())
         return slider
 
     def __change_low(self):
-        print("XD")
         self.__plot.set_x_low_lim(self.__low_slider.value())
+        new_value = self.__low_slider.value()
+        high_value = self.__high_slider.value()
+        if new_value >= high_value:
+            self.__low_slider.setValue(high_value - 1)
 
     def __change_high(self):
-        print("XD")
         self.__plot.set_x_high_lim(self.__high_slider.value())
+        new_value = self.__high_slider.value()
+        low_value = self.__low_slider.value()
+        if new_value <= low_value:
+            self.__high_slider.setValue(low_value + 1)
 
     def get_low_slider(self):
         return self.__low_slider
