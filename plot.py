@@ -88,5 +88,5 @@ class Plot(FigureCanvasQTAgg):
         c_list = list(self.__ex_data.keys())
         countries_end = '; '.join(c_list)
         countries = "Selected countries (provinces): " + countries_end
-        print(countries)
+
         return countries
