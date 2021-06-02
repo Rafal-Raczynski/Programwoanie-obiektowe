@@ -54,8 +54,11 @@ class Plot(FigureCanvasQTAgg):
         self.__ex_data = n_of_patients_in_countries
         self.__axes.clear()
 
-    def set_x_lim(self, low, up):
+    def set_x_low_lim(self, low):
         self.__low = low
+        self.display_selected_data()
+
+    def set_x_high_lim(self, up):
         self.__up = up
         self.display_selected_data()
 
