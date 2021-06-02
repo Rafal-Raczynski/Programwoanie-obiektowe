@@ -32,6 +32,7 @@ class Covid(QMainWindow):
         button.clicked.connect(button.handle_select_file)
         while True:
             if button.handle_select_file() == 0:
+                button.setDisabled(True)
                 break
         a = ReadData(button.get_filepath())
         print(a.get_amount_of_days())

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
+from textwrap import wrap
 
 
 class PdfReportGenerator:
@@ -21,7 +22,7 @@ class PdfReportGenerator:
         canvas.setFont("Helvetica", 18)
         title = self.__title
         subtitle = self.__subtitle
-        title_magic_offset, subtitle_magic_offset, img_magic_offset = 70, 100, 530
+        title_magic_offset, subtitle_magic_offset, img_magic_offset = 70, 100, 650
         title_x, title_y = A4[0] / 2, A4[1] - title_magic_offset
         subtitle_x, subtitle_y = A4[0] / 2, A4[1] - subtitle_magic_offset
         img_x, img_y = 0, A4[1] - img_magic_offset
@@ -29,5 +30,12 @@ class PdfReportGenerator:
         canvas.drawCentredString(title_x, title_y, title)
         canvas.drawCentredString(subtitle_x, subtitle_y, subtitle)
         canvas.drawImage(img, img_x, img_y, A4[0], A4[1] / 2)
+
+        canvas.setFont("Helvetica", 12)
+        data_wrap = "\n".join(wrap(data, 80))
+        data_text = canvas.beginText(A4[0] - 500, A4[1] - 130)
+        for line in data_wrap.splitlines(False):
+            data_text.textLine(line.rstrip())
+        canvas.drawText(data_text)
 
         return canvas
