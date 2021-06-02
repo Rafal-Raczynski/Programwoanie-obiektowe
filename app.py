@@ -48,14 +48,11 @@ class Covid(QMainWindow):
         self.__layout.addWidget(plot, 0, 0, 8, 5)
         self.__layout.addWidget(slider.get_low_slider(), 9, 1, 1, 4)
         self.__layout.addWidget(slider.get_high_slider(), 10, 1, 1, 4)
-        self.__layout.addWidget(QLabel(slider.low_slider_date), 9, 0, 1, 1)
-        self.__layout.addWidget(QLabel(slider.high_slider_date), 10, 0, 1, 1)
+        self.__layout.addWidget(slider.low_slider_date, 9, 0, 1, 1)
+        self.__layout.addWidget(slider.high_slider_date, 10, 0, 1, 1)
 
         pdf_button = PdfSaveButton("Export to PDF", plot)
         self.__layout.addWidget(pdf_button, 10, 15)
-
-
-
 
 
 class ReadData:
@@ -183,8 +180,9 @@ class Sliders(QSlider):
         self.__plot = plot
         self.__low_slider = self.__prepare_low_slider()
         self.__high_slider = self.__prepare_high_slider()
-        self.low_slider_date = self.__get_low_slider_date()
-        self.high_slider_date = self.__get_high_slider_date()
+        self.low_slider_date = QLabel()
+        print(self.low_slider_date.text())
+        self.high_slider_date = QLabel()
 
     def __prepare_slider(self, value):
         slider = QSlider(QtCore.Qt.Horizontal)
@@ -210,7 +208,7 @@ class Sliders(QSlider):
         high_value = self.__high_slider.value()
         if new_value >= high_value:
             self.__low_slider.setValue(high_value - 1)
-        self.low_slider_date = self.__get_low_slider_date()
+        self.__get_low_slider_date()
 
     def __change_high(self):
         self.__plot.set_x_high_lim(self.__high_slider.value())
@@ -218,7 +216,7 @@ class Sliders(QSlider):
         low_value = self.__low_slider.value()
         if new_value <= low_value:
             self.__high_slider.setValue(low_value + 1)
-        self.high_slider_date = self.__get_high_slider_date()
+        self.__get_high_slider_date()
 
     def get_low_slider(self):
         return self.__low_slider
@@ -229,18 +227,18 @@ class Sliders(QSlider):
     def __get_low_slider_date(self):
         start_date = "22-01-20"
         date = datetime.strptime(start_date, "%d-%m-%y")
-        end_date = date + timedelta(days=self.__low_slider.value()-1)
+        end_date = date + timedelta(days=self.__low_slider.value() - 1)
         end_date = end_date.strftime("%d-%m-%Y")
         print(end_date)
-        return end_date
+        self.low_slider_date.setText(end_date)
 
     def __get_high_slider_date(self):
         start_date = "22-01-20"
         date = datetime.strptime(start_date, "%d-%m-%y")
-        end_date = date + timedelta(days=self.__high_slider.value()-1)
+        end_date = date + timedelta(days=self.__high_slider.value() - 1)
         end_date = end_date.strftime("%d-%m-%Y")
         print(end_date)
-        return end_date
+        self.high_slider_date.setText(end_date)
 
 
 class PdfSaveButton(QPushButton):
