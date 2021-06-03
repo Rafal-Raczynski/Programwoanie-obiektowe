@@ -32,9 +32,8 @@ class PdfReportGenerator:
         canvas.drawCentredString(subtitle_x, subtitle_y, subtitle)
         canvas.drawImage(img, img_x, img_y, A4[0], A4[1] / 2)
 
-
-        countries_wrap = "\n".join(wrap(countries, 70))
-        countries_text = canvas.beginText(A4[0] - 450, A4[1] - 180)
+        countries_wrap = "\n".join(wrap(countries, 65))
+        countries_text = canvas.beginText(A4[0] - 425, A4[1] - 180)
         for line in countries_wrap.splitlines(False):
             countries_text.textLine(line.rstrip())
         canvas.drawText(countries_text)
