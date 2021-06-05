@@ -13,13 +13,12 @@ class Filtr(QLineEdit):
         self.button.clicked.connect(self.__filtr_countries)
 
     def __filtr_countries(self):
-        length = len(self.text())
         for country in self.__all_countries:
-            if self.text().upper() == country[0:length].upper() and country not in self.__filtred_countries:
+            if self.text().upper() in country.upper() and country not in self.__filtred_countries:
                 self.__filtred_countries.append(country)
-            elif self.text().upper() != country[0:length].upper() and country in self.__filtred_countries:
+            elif self.text().upper() not in country.upper() and country in self.__filtred_countries:
                 self.__filtred_countries.remove(country)
         self.__update_buttons()
-
+        
     def __update_buttons(self):
         self.scroll.set_all_countries(self.__filtred_countries)
