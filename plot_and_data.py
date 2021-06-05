@@ -1,7 +1,8 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from matplotlib import pyplot as plt
 from io import BytesIO
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from os import path
 
 
 class Plot(FigureCanvasQTAgg):
@@ -90,3 +91,61 @@ class Plot(FigureCanvasQTAgg):
         countries = "Selected countries (provinces): " + countries_end
 
         return countries
+
+
+class ReadData:
+    def __init__(self, filepath):
+        self.__amount_of_days = None
+        self.__filepath = filepath
+        self.__list_of_countries = list()
+        self.__read_all_countries_data()
+
+    def __read_all_countries_data(self):
+        i = 1
+        with open(self.__filepath, "r") as f:
+            for line in f:
+                possible_region = line.split(",")[0]
+                if i != 1 and possible_region == "":
+                    country = line.split(",")[1]
+                    if self.__amount_of_days is None:
+                        self.__amount_of_days = len(line.split(",")[4:])
+                    self.__list_of_countries.append(country)
+                elif i != 1:
+                    country = line.split(",")[1] + ", " + line.split(",")[0]
+                    if self.__amount_of_days is None:
+                        self.__amount_of_days = len(line.split(",")[4:])
+                    self.__list_of_countries.append(country)
+                i = i + 1
+
+    def get_amount_of_days(self):
+        return self.__amount_of_days
+
+    def get_list_of_all_countries(self):
+        return self.__list_of_countries
+
+
+class Import(QFileDialog):
+    def __init__(self, accepted_formats):
+        super().__init__()
+        self.__accepted_formats = accepted_formats
+        self.__filepath = None
+        while True:
+            if self.handle_select_file() == 0:
+                break
+
+    def get_filepath(self):
+        return self.__filepath
+
+    def handle_select_file(self):
+        self.__filepath, _ = self.getOpenFileName(self, "Select file")
+        file_extension = path.splitext(self.__filepath)[1].lower()
+        if file_extension not in self.__accepted_formats:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Wrong file!")
+            msg.setInformativeText("Please choose file again")
+            msg.setWindowTitle("Error")
+            msg.exec_()
+            print("Wrong file! Please choose file again")
+            return 1
+        return 0
